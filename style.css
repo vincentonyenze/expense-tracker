@@ -199,9 +199,18 @@ body {
   color: var(--color-muted);
 }
 
+.transaction-item__description {
+  font-weight: 600;
+}
+
 .transaction-item__amount {
   font-weight: 700;
   white-space: nowrap;
+  color: var(--color-expense);
+}
+
+.transaction-item--income .transaction-item__amount {
+  color: var(--color-income);
 }
 
 .empty-state {
