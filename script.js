@@ -7,6 +7,9 @@ const categoryInput = document.getElementById("category");
 const dateInput = document.getElementById("date");
 const transactionList = document.getElementById("transaction-list");
 const emptyState = document.getElementById("empty-state");
+const balanceEl = document.getElementById("balance");
+const totalIncomeEl = document.getElementById("total-income");
+const totalExpenseEl = document.getElementById("total-expense");
 
 // ===== State =====
 let transactions = [];
@@ -59,6 +62,12 @@ function addTransaction(transaction) {
   transactions.push(transaction);
 }
 
+function calculateTotal(type) {
+  return transactions
+    .filter((transaction) => transaction.type === type)
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+}
+
 // ===== Rendering =====
 function createTransactionElement(transaction) {
   const item = document.createElement("li");
@@ -92,6 +101,22 @@ function renderTransactions() {
   emptyState.hidden = transactions.length > 0;
 }
 
+function renderSummary() {
+  const income = calculateTotal("income");
+  const expense = calculateTotal("expense");
+  const balance = income - expense;
+
+  totalIncomeEl.textContent = formatCurrency(income);
+  totalExpenseEl.textContent = formatCurrency(expense);
+  balanceEl.textContent = formatCurrency(balance);
+  balanceEl.classList.toggle("is-negative", balance < 0);
+}
+
+function render() {
+  renderTransactions();
+  renderSummary();
+}
+
 // ===== Form =====
 function resetForm() {
   form.reset();
@@ -103,7 +128,7 @@ function handleSubmit(event) {
 
   const transaction = createTransaction();
   addTransaction(transaction);
-  renderTransactions();
+  render();
 
   resetForm();
 }
@@ -111,4 +136,4 @@ function handleSubmit(event) {
 // ===== Init =====
 form.addEventListener("submit", handleSubmit);
 dateInput.value = getTodayDate();
-renderTransactions();
+render();
