@@ -5,6 +5,7 @@ const amountInput = document.getElementById("amount");
 const typeInput = document.getElementById("type");
 const categoryInput = document.getElementById("category");
 const dateInput = document.getElementById("date");
+const formError = document.getElementById("form-error");
 const transactionList = document.getElementById("transaction-list");
 const emptyState = document.getElementById("empty-state");
 const balanceEl = document.getElementById("balance");
@@ -117,6 +118,44 @@ function render() {
   renderSummary();
 }
 
+// ===== Validation =====
+const MAX_DESCRIPTION_LENGTH = 50;
+
+function validateTransaction(transaction) {
+  if (!transaction.description) {
+    return { input: descriptionInput, message: "Please enter a description." };
+  }
+  if (transaction.description.length > MAX_DESCRIPTION_LENGTH) {
+    return {
+      input: descriptionInput,
+      message: `Description must be ${MAX_DESCRIPTION_LENGTH} characters or fewer.`,
+    };
+  }
+  if (!Number.isFinite(transaction.amount) || transaction.amount <= 0) {
+    return { input: amountInput, message: "Please enter an amount greater than 0." };
+  }
+  if (!transaction.category) {
+    return { input: categoryInput, message: "Please select a category." };
+  }
+  if (!transaction.date) {
+    return { input: dateInput, message: "Please choose a date." };
+  }
+  return null;
+}
+
+function showError(error) {
+  formError.textContent = error.message;
+  error.input.setAttribute("aria-invalid", "true");
+  error.input.focus();
+}
+
+function clearError() {
+  formError.textContent = "";
+  form
+    .querySelectorAll("[aria-invalid]")
+    .forEach((input) => input.removeAttribute("aria-invalid"));
+}
+
 // ===== Form =====
 function resetForm() {
   form.reset();
@@ -125,8 +164,15 @@ function resetForm() {
 
 function handleSubmit(event) {
   event.preventDefault();
+  clearError();
 
   const transaction = createTransaction();
+  const error = validateTransaction(transaction);
+  if (error) {
+    showError(error);
+    return;
+  }
+
   addTransaction(transaction);
   render();
 
@@ -135,5 +181,6 @@ function handleSubmit(event) {
 
 // ===== Init =====
 form.addEventListener("submit", handleSubmit);
+form.addEventListener("input", clearError);
 dateInput.value = getTodayDate();
 render();

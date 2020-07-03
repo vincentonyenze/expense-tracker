@@ -151,6 +151,12 @@ body {
   border-color: transparent;
 }
 
+.form-group [aria-invalid="true"],
+.form-group [aria-invalid="true"]:focus {
+  border-color: var(--color-expense);
+  outline-color: var(--color-expense);
+}
+
 .form-error {
   grid-column: 1 / -1;
   color: var(--color-expense);
