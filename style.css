@@ -223,6 +223,38 @@ body {
   color: var(--color-income);
 }
 
+.transaction-item__side {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.transaction-item__actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-action {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.btn-action:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.btn-action--delete:hover {
+  border-color: var(--color-expense);
+  color: var(--color-expense);
+}
+
 .empty-state {
   text-align: center;
   color: var(--color-muted);
@@ -271,6 +303,11 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
+  }
+
+  .transaction-item__side {
+    width: 100%;
+    justify-content: space-between;
   }
 
   /* Larger tap target on touch screens */

@@ -63,6 +63,10 @@ function addTransaction(transaction) {
   transactions.push(transaction);
 }
 
+function deleteTransaction(id) {
+  transactions = transactions.filter((transaction) => transaction.id !== id);
+}
+
 function calculateTotal(type) {
   return transactions
     .filter((transaction) => transaction.type === type)
@@ -92,8 +96,28 @@ function createTransactionElement(transaction) {
   const sign = transaction.type === "income" ? "+" : "-";
   amount.textContent = `${sign}${formatCurrency(transaction.amount)}`;
 
-  item.append(details, amount);
+  const actions = document.createElement("div");
+  actions.className = "transaction-item__actions";
+  actions.append(
+    createActionButton("delete", "Delete", `Delete ${transaction.description}`)
+  );
+
+  const side = document.createElement("div");
+  side.className = "transaction-item__side";
+  side.append(amount, actions);
+
+  item.append(details, side);
   return item;
+}
+
+function createActionButton(action, text, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `btn-action btn-action--${action}`;
+  button.dataset.action = action;
+  button.textContent = text;
+  button.setAttribute("aria-label", label);
+  return button;
 }
 
 function renderTransactions() {
@@ -179,8 +203,23 @@ function handleSubmit(event) {
   resetForm();
 }
 
+// ===== List actions =====
+function handleListClick(event) {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const item = button.closest(".transaction-item");
+  const id = Number(item.dataset.id);
+
+  if (button.dataset.action === "delete") {
+    deleteTransaction(id);
+    render();
+  }
+}
+
 // ===== Init =====
 form.addEventListener("submit", handleSubmit);
 form.addEventListener("input", clearError);
+transactionList.addEventListener("click", handleListClick);
 dateInput.value = getTodayDate();
 render();
