@@ -6,6 +6,9 @@ const typeInput = document.getElementById("type");
 const categoryInput = document.getElementById("category");
 const dateInput = document.getElementById("date");
 const formError = document.getElementById("form-error");
+const formTitle = document.getElementById("form-title");
+const submitBtn = document.getElementById("submit-btn");
+const cancelBtn = document.getElementById("cancel-btn");
 const transactionList = document.getElementById("transaction-list");
 const emptyState = document.getElementById("empty-state");
 const balanceEl = document.getElementById("balance");
@@ -14,6 +17,7 @@ const totalExpenseEl = document.getElementById("total-expense");
 
 // ===== State =====
 let transactions = [];
+let editingId = null; // id of the transaction being edited, or null when adding
 
 // ===== Helpers =====
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -48,9 +52,8 @@ function getTodayDate() {
 }
 
 // ===== Transactions =====
-function createTransaction() {
+function getFormData() {
   return {
-    id: Date.now(),
     description: descriptionInput.value.trim(),
     amount: Number(amountInput.value),
     type: typeInput.value,
@@ -59,8 +62,14 @@ function createTransaction() {
   };
 }
 
-function addTransaction(transaction) {
-  transactions.push(transaction);
+function addTransaction(data) {
+  transactions.push({ id: Date.now(), ...data });
+}
+
+function updateTransaction(id, data) {
+  transactions = transactions.map((transaction) =>
+    transaction.id === id ? { ...transaction, ...data } : transaction
+  );
 }
 
 function deleteTransaction(id) {
@@ -77,6 +86,7 @@ function calculateTotal(type) {
 function createTransactionElement(transaction) {
   const item = document.createElement("li");
   item.className = `transaction-item transaction-item--${transaction.type}`;
+  item.classList.toggle("is-editing", transaction.id === editingId);
   item.dataset.id = transaction.id;
 
   const details = document.createElement("div");
@@ -99,6 +109,7 @@ function createTransactionElement(transaction) {
   const actions = document.createElement("div");
   actions.className = "transaction-item__actions";
   actions.append(
+    createActionButton("edit", "Edit", `Edit ${transaction.description}`),
     createActionButton("delete", "Delete", `Delete ${transaction.description}`)
   );
 
@@ -186,21 +197,60 @@ function resetForm() {
   dateInput.value = getTodayDate();
 }
 
+function startEditing(id) {
+  const transaction = transactions.find((item) => item.id === id);
+  if (!transaction) return;
+
+  editingId = id;
+  descriptionInput.value = transaction.description;
+  amountInput.value = transaction.amount;
+  typeInput.value = transaction.type;
+  categoryInput.value = transaction.category;
+  dateInput.value = transaction.date;
+
+  formTitle.textContent = "Edit transaction";
+  submitBtn.textContent = "Save changes";
+  cancelBtn.hidden = false;
+
+  clearError();
+  render();
+  descriptionInput.focus();
+}
+
+function stopEditing() {
+  editingId = null;
+  formTitle.textContent = "Add transaction";
+  submitBtn.textContent = "Add transaction";
+  cancelBtn.hidden = true;
+
+  clearError();
+  resetForm();
+}
+
 function handleSubmit(event) {
   event.preventDefault();
   clearError();
 
-  const transaction = createTransaction();
-  const error = validateTransaction(transaction);
+  const data = getFormData();
+  const error = validateTransaction(data);
   if (error) {
     showError(error);
     return;
   }
 
-  addTransaction(transaction);
-  render();
+  if (editingId === null) {
+    addTransaction(data);
+  } else {
+    updateTransaction(editingId, data);
+  }
 
-  resetForm();
+  stopEditing();
+  render();
+}
+
+function handleCancel() {
+  stopEditing();
+  render();
 }
 
 // ===== List actions =====
@@ -211,8 +261,14 @@ function handleListClick(event) {
   const item = button.closest(".transaction-item");
   const id = Number(item.dataset.id);
 
+  if (button.dataset.action === "edit") {
+    startEditing(id);
+  }
+
   if (button.dataset.action === "delete") {
     deleteTransaction(id);
+    // Don't keep editing a transaction that no longer exists
+    if (id === editingId) stopEditing();
     render();
   }
 }
@@ -220,6 +276,7 @@ function handleListClick(event) {
 // ===== Init =====
 form.addEventListener("submit", handleSubmit);
 form.addEventListener("input", clearError);
+cancelBtn.addEventListener("click", handleCancel);
 transactionList.addEventListener("click", handleListClick);
 dateInput.value = getTodayDate();
 render();
