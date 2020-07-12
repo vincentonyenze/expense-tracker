@@ -51,6 +51,27 @@ function getTodayDate() {
   return `${year}-${month}-${day}`;
 }
 
+// ===== Storage =====
+const STORAGE_KEY = "expense-tracker:transactions";
+
+function loadTransactions() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch (error) {
+    console.error("Could not load saved transactions:", error);
+    return [];
+  }
+}
+
+function saveTransactions() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+  } catch (error) {
+    console.error("Could not save transactions:", error);
+  }
+}
+
 // ===== Transactions =====
 function getFormData() {
   return {
@@ -64,16 +85,19 @@ function getFormData() {
 
 function addTransaction(data) {
   transactions.push({ id: Date.now(), ...data });
+  saveTransactions();
 }
 
 function updateTransaction(id, data) {
   transactions = transactions.map((transaction) =>
     transaction.id === id ? { ...transaction, ...data } : transaction
   );
+  saveTransactions();
 }
 
 function deleteTransaction(id) {
   transactions = transactions.filter((transaction) => transaction.id !== id);
+  saveTransactions();
 }
 
 function calculateTotal(type) {
@@ -278,5 +302,6 @@ form.addEventListener("submit", handleSubmit);
 form.addEventListener("input", clearError);
 cancelBtn.addEventListener("click", handleCancel);
 transactionList.addEventListener("click", handleListClick);
+transactions = loadTransactions();
 dateInput.value = getTodayDate();
 render();
