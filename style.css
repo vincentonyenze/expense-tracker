@@ -208,6 +208,10 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
+.toolbar__search {
+  grid-column: 1 / -1;
+}
+
 /* ===== Transaction list ===== */
 .transaction-list {
   list-style: none;

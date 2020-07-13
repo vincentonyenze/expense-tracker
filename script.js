@@ -15,6 +15,7 @@ const balanceEl = document.getElementById("balance");
 const totalIncomeEl = document.getElementById("total-income");
 const totalExpenseEl = document.getElementById("total-expense");
 const toolbar = document.getElementById("toolbar");
+const searchInput = document.getElementById("search");
 const filterType = document.getElementById("filter-type");
 const filterCategory = document.getElementById("filter-category");
 
@@ -22,6 +23,7 @@ const filterCategory = document.getElementById("filter-category");
 let transactions = [];
 let editingId = null; // id of the transaction being edited, or null when adding
 let filters = {
+  search: "",
   type: "all",
   category: "all",
 };
@@ -109,10 +111,13 @@ function deleteTransaction(id) {
 
 function getVisibleTransactions() {
   return transactions.filter((transaction) => {
+    const matchesSearch = transaction.description
+      .toLowerCase()
+      .includes(filters.search);
     const matchesType = filters.type === "all" || transaction.type === filters.type;
     const matchesCategory =
       filters.category === "all" || transaction.category === filters.category;
-    return matchesType && matchesCategory;
+    return matchesSearch && matchesType && matchesCategory;
   });
 }
 
@@ -310,6 +315,7 @@ function populateCategoryFilter() {
 
 function handleFiltersChange() {
   filters = {
+    search: searchInput.value.trim().toLowerCase(),
     type: filterType.value,
     category: filterCategory.value,
   };
