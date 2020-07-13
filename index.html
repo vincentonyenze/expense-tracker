@@ -87,6 +87,25 @@
     <!-- Transaction history -->
     <section class="panel">
       <h2>History</h2>
+
+      <div id="toolbar" class="toolbar">
+        <div class="form-group">
+          <label for="filter-type">Type</label>
+          <select id="filter-type">
+            <option value="all">All types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-category">Category</label>
+          <select id="filter-category">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+      </div>
+
       <ul id="transaction-list" class="transaction-list"></ul>
       <p id="empty-state" class="empty-state">No transactions yet. Add your first one above.</p>
     </section>

@@ -198,6 +198,16 @@ body {
   background: var(--color-bg);
 }
 
+/* ===== Toolbar (filters) ===== */
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space);
+  margin-bottom: var(--space);
+  padding-bottom: var(--space);
+  border-bottom: 1px solid var(--color-border);
+}
+
 /* ===== Transaction list ===== */
 .transaction-list {
   list-style: none;

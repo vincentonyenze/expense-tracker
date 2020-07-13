@@ -14,10 +14,17 @@ const emptyState = document.getElementById("empty-state");
 const balanceEl = document.getElementById("balance");
 const totalIncomeEl = document.getElementById("total-income");
 const totalExpenseEl = document.getElementById("total-expense");
+const toolbar = document.getElementById("toolbar");
+const filterType = document.getElementById("filter-type");
+const filterCategory = document.getElementById("filter-category");
 
 // ===== State =====
 let transactions = [];
 let editingId = null; // id of the transaction being edited, or null when adding
+let filters = {
+  type: "all",
+  category: "all",
+};
 
 // ===== Helpers =====
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -100,6 +107,15 @@ function deleteTransaction(id) {
   saveTransactions();
 }
 
+function getVisibleTransactions() {
+  return transactions.filter((transaction) => {
+    const matchesType = filters.type === "all" || transaction.type === filters.type;
+    const matchesCategory =
+      filters.category === "all" || transaction.category === filters.category;
+    return matchesType && matchesCategory;
+  });
+}
+
 function calculateTotal(type) {
   return transactions
     .filter((transaction) => transaction.type === type)
@@ -156,9 +172,15 @@ function createActionButton(action, text, label) {
 }
 
 function renderTransactions() {
-  const items = transactions.map(createTransactionElement);
+  const visibleTransactions = getVisibleTransactions();
+  const items = visibleTransactions.map(createTransactionElement);
   transactionList.replaceChildren(...items);
-  emptyState.hidden = transactions.length > 0;
+
+  emptyState.hidden = visibleTransactions.length > 0;
+  emptyState.textContent =
+    transactions.length === 0
+      ? "No transactions yet. Add your first one above."
+      : "No transactions match your filters.";
 }
 
 function renderSummary() {
@@ -277,6 +299,23 @@ function handleCancel() {
   render();
 }
 
+// ===== Filters =====
+function populateCategoryFilter() {
+  // Reuse the form's categories so the list only lives in one place
+  const options = [...categoryInput.options]
+    .filter((option) => option.value)
+    .map((option) => new Option(option.textContent, option.value));
+  filterCategory.append(...options);
+}
+
+function handleFiltersChange() {
+  filters = {
+    type: filterType.value,
+    category: filterCategory.value,
+  };
+  renderTransactions();
+}
+
 // ===== List actions =====
 function handleListClick(event) {
   const button = event.target.closest("button[data-action]");
@@ -302,6 +341,8 @@ form.addEventListener("submit", handleSubmit);
 form.addEventListener("input", clearError);
 cancelBtn.addEventListener("click", handleCancel);
 transactionList.addEventListener("click", handleListClick);
+toolbar.addEventListener("input", handleFiltersChange);
 transactions = loadTransactions();
+populateCategoryFilter();
 dateInput.value = getTodayDate();
 render();
