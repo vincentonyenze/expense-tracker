@@ -11,6 +11,8 @@ const submitBtn = document.getElementById("submit-btn");
 const cancelBtn = document.getElementById("cancel-btn");
 const transactionList = document.getElementById("transaction-list");
 const emptyState = document.getElementById("empty-state");
+const emptyMessage = document.getElementById("empty-message");
+const clearFiltersBtn = document.getElementById("clear-filters-btn");
 const balanceEl = document.getElementById("balance");
 const totalIncomeEl = document.getElementById("total-income");
 const totalExpenseEl = document.getElementById("total-expense");
@@ -196,11 +198,13 @@ function renderTransactions() {
   const items = visibleTransactions.map(createTransactionElement);
   transactionList.replaceChildren(...items);
 
+  const hasTransactions = transactions.length > 0;
   emptyState.hidden = visibleTransactions.length > 0;
-  emptyState.textContent =
-    transactions.length === 0
-      ? "No transactions yet. Add your first one above."
-      : "No transactions match your filters.";
+  emptyMessage.textContent = hasTransactions
+    ? "No transactions match your search or filters."
+    : "No transactions yet. Add your first one above.";
+  // Only offer "Clear filters" when the filters are what's hiding everything
+  clearFiltersBtn.hidden = !hasTransactions;
 }
 
 function renderSummary() {
@@ -338,6 +342,14 @@ function handleFiltersChange() {
   renderTransactions();
 }
 
+function clearFilters() {
+  // Sorting isn't a filter, so it stays as the user chose
+  searchInput.value = "";
+  filterType.value = "all";
+  filterCategory.value = "all";
+  handleFiltersChange();
+}
+
 // ===== List actions =====
 function handleListClick(event) {
   const button = event.target.closest("button[data-action]");
@@ -364,6 +376,7 @@ form.addEventListener("input", clearError);
 cancelBtn.addEventListener("click", handleCancel);
 transactionList.addEventListener("click", handleListClick);
 toolbar.addEventListener("input", handleFiltersChange);
+clearFiltersBtn.addEventListener("click", clearFilters);
 transactions = loadTransactions();
 populateCategoryFilter();
 dateInput.value = getTodayDate();

@@ -122,7 +122,11 @@
       </div>
 
       <ul id="transaction-list" class="transaction-list"></ul>
-      <p id="empty-state" class="empty-state">No transactions yet. Add your first one above.</p>
+      <div id="empty-state" class="empty-state">
+        <span class="empty-state__icon" aria-hidden="true">🧾</span>
+        <p id="empty-message">No transactions yet. Add your first one above.</p>
+        <button type="button" id="clear-filters-btn" class="btn-action" hidden>Clear filters</button>
+      </div>
     </section>
   </main>
 </body>
