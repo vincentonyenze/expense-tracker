@@ -18,6 +18,7 @@ const toolbar = document.getElementById("toolbar");
 const searchInput = document.getElementById("search");
 const filterType = document.getElementById("filter-type");
 const filterCategory = document.getElementById("filter-category");
+const sortSelect = document.getElementById("sort");
 
 // ===== State =====
 let transactions = [];
@@ -26,6 +27,7 @@ let filters = {
   search: "",
   type: "all",
   category: "all",
+  sort: "date-desc",
 };
 
 // ===== Helpers =====
@@ -109,8 +111,17 @@ function deleteTransaction(id) {
   saveTransactions();
 }
 
+// Compare functions for sort(): negative = a first, positive = b first.
+// Ties on date fall back to id, so newer entries on the same day come first.
+const sorters = {
+  "date-desc": (a, b) => b.date.localeCompare(a.date) || b.id - a.id,
+  "date-asc": (a, b) => a.date.localeCompare(b.date) || a.id - b.id,
+  "amount-desc": (a, b) => b.amount - a.amount,
+  "amount-asc": (a, b) => a.amount - b.amount,
+};
+
 function getVisibleTransactions() {
-  return transactions.filter((transaction) => {
+  const filtered = transactions.filter((transaction) => {
     const matchesSearch = transaction.description
       .toLowerCase()
       .includes(filters.search);
@@ -119,6 +130,10 @@ function getVisibleTransactions() {
       filters.category === "all" || transaction.category === filters.category;
     return matchesSearch && matchesType && matchesCategory;
   });
+
+  // sort() changes the array it's called on. filter() already returned
+  // a new array, so this won't reorder the saved `transactions`.
+  return filtered.sort(sorters[filters.sort]);
 }
 
 function calculateTotal(type) {
@@ -318,6 +333,7 @@ function handleFiltersChange() {
     search: searchInput.value.trim().toLowerCase(),
     type: filterType.value,
     category: filterCategory.value,
+    sort: sortSelect.value,
   };
   renderTransactions();
 }
