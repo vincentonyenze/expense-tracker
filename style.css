@@ -209,3 +209,53 @@ body {
   color: var(--color-muted);
   padding: calc(var(--space) * 2) 0;
 }
+
+/* ===== Responsive ===== */
+
+/* Tablets and small laptops */
+@media (max-width: 768px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Balance card spans the full row above income and expenses */
+  .card--balance {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  :root {
+    --space: 0.875rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .summary,
+  #transaction-form {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: var(--space);
+  }
+
+  .card__amount {
+    font-size: 1.25rem;
+  }
+
+  /* Stack transaction details above the amount */
+  .transaction-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  /* Larger tap target on touch screens */
+  .btn {
+    padding: 0.9rem;
+  }
+}
